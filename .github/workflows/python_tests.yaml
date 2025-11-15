@@ -1,4 +1,4 @@
-name: CI/CD Pipeline with Docker
+name: CI/CD Pipeline with Docker and Compose
 
 on:
   push:
@@ -15,14 +15,16 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      - name: Instalar Docker Compose
+        run: |
+          sudo apt-get update
+          sudo apt-get install docker-compose -y
 
-      - name: Build Docker image
-        run: docker build -t lab_api .
+      - name: Build com docker-compose
+        run: docker-compose -f docker-compose.yml build
 
       - name: Validar sintaxe do app dentro do container
-        run: docker run --rm lab_api python -m py_compile app.py
+        run: docker-compose run --rm api python -m py_compile app.py #py_compile valida a sintaxe dos arquivos
 
   test:
     runs-on: ubuntu-latest
@@ -32,16 +34,17 @@ jobs:
       - name: Checkout do código
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build Docker image (novamente porque o workspace reseta)
-        run: docker build -t lab_api .
-
-      - name: Executar testes unitários dentro do container
+      - name: Instalar Docker Compose
         run: |
-          docker run --rm lab_api \
-            python -m unittest discover -s . -p "test_*.py"
+          sudo apt-get update
+          sudo apt-get install docker-compose -y
+
+      - name: Build novamente (workspace do GitHub zera)
+        run: docker-compose -f docker-compose.yml build
+
+      - name: Rodar testes unitários dentro do container
+        run: docker-compose run --rm api python -m unittest discover -s . -p "test_*.py"
+
 
   deploy:
     runs-on: ubuntu-latest

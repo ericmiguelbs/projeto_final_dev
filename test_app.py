@@ -22,7 +22,7 @@ class CriticalTests(unittest.TestCase):
         response = self.client.post('/items')
         self.assertEqual(response.status_code, 405)
 
-    # 3Estrutura do token no login
+    #Estrutura do token no login
     def test_login_token_structure(self):
         response = self.client.post('/login')
         self.assertEqual(response.status_code, 200)
